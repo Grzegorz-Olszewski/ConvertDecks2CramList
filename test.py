@@ -28,21 +28,21 @@ class Window(QDialog):
 		label.setText(text)
 		label.move(0,5)
 		for index, deck in enumerate(self.all_decks):
-			self.checkBox = aCheckBox(deck, self)
-			self.checkBox.stateChanged.connect(self.checkBox.add_or_remove_deck_from_export)
-			self.checkBox.move(0, 30+20*index)
+			self.check_box = MyCheckBox(deck, self)
+			self.check_box.stateChanged.connect(self.check_box.add_or_remove_deck_from_export)
+			self.check_box.move(0, 30 + 20*index)
 			if longest_line < len(deck):
 				longest_line  = len(deck)
 		btn = QPushButton("EXPORT", self)
 		btn.resize(btn.sizeHint())
-		bottom = 50+20*len(self.all_decks)
+		bottom = 50 + 20*len(self.all_decks)
 		btn.move(0, bottom)
-		height = bottom+40
+		height = bottom + 40
 		self.setGeometry(50, 50, longest_line*8, height)
 		self.exporter = Exporter(self)
-		btn.clicked.connect(self.exporter.convert2CramList)
+		btn.clicked.connect(self.exporter.convert_2_cram_list)
 
-class aCheckBox(QCheckBox):
+class MyCheckBox(QCheckBox):
 	def __init__(self, text, window):
 		self.text = text
 		self.window = window
@@ -59,36 +59,36 @@ class Exporter(object):
 		self.window = window
 		self.decks_to_export = self.window.decks
 
-	def makeListFromOneDeck(self, deckName):
+	def make_list_from_one_deck(self, deckName):
 		col = mw.col
 		decks = col.decks
 		rosId = decks.id(deckName)
-		listOfCards = decks.cids(rosId)
+		list_of_cards = decks.cids(rosId)
 		notes = []
-		for id in listOfCards:
+		for id in list_of_cards:
 		    card = col.getCard(id) 
 		    note = card.note()
 		    notes.append([note.fields[0],note.fields[1]])
 		return notes
 
-	def getFileName(self):
+	def get_file_name(self):
 		name = QFileDialog.getSaveFileName()
 		return name
 
-	def makeListFromDecks(self, array):
+	def make_list_from_decks(self, array):
 		decks = []
 		for deck in array:
-			decks += self.makeListFromOneDeck(deck)
+			decks += self.make_list_from_one_deck(deck)
 		return decks
 
-	def wrapIntoHalfLines(self, decks):
+	def wrap_into_half_lines(self, decks):
 		rows = decks
 		rows = [[textwrap.wrap(thing, width=35) for thing in row] for row in rows]
 		rows = [list(itertools.izip_longest(row[0], row[1], fillvalue = "")) for row in rows]
 		rows = [[list(line) for line in row ] for row in rows]
 		return rows
 
-	def adjustHalfLines(self, rows):
+	def adjust_half_lines(self, rows):
 		for index, row in enumerate(rows):
 			length = len(rows[index])
 			k = 0
@@ -100,29 +100,29 @@ class Exporter(object):
 				k+=1
 		return rows
 
-	def makeFormatedString(self, rows):
+	def make_formatted_string(self, rows):
 		to_save = ''
 		for row in rows:
 			for line in row: 
 				to_save = to_save + line[0] + " " + line[1] + "\n\n"
 		return to_save
 
-	def saveStringToFile(self, fileName, string_to_save):
+	def save_string_to_file(self, file_name, string_to_save):
 		if not string_to_save:
-			with io.open(fileName, "wb") as readFile:
+			with io.open(file_name, "wb") as readFile:
 				readFile.write(string_to_save)
 		else:
-			with io.open(fileName, "w") as readFile:
+			with io.open(file_name, "w") as readFile:
 				readFile.write(string_to_save)
 
-	def convert2CramList(self):
+	def convert_2_cram_list(self):
 
-		decks = self.makeListFromDecks(self.decks_to_export)
-		rows = self.wrapIntoHalfLines(decks)
-		name = self.getFileName()
-		rows = self.adjustHalfLines(rows)
-		string_to_save = self.makeFormatedString(rows)
-		self.saveStringToFile(name, string_to_save)
+		decks = self.make_list_from_decks(self.decks_to_export)
+		rows = self.wrap_into_half_lines(decks)
+		name = self.get_file_name()
+		rows = self.adjust_half_lines(rows)
+		string_to_save = self.make_formatted_string(rows)
+		self.save_string_to_file(name, string_to_save)
 
 def run():
 	GUI = Window(mw)
