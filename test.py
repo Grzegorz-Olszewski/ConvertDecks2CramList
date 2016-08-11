@@ -21,6 +21,7 @@ class Window(QDialog):
 		self.home()
 		self.show()
 
+	#Builds UI for plugin.
 	def home(self):
 		label = QLabel(self)
 		text = "Choose decks you want to export to file."
@@ -59,6 +60,7 @@ class Exporter(object):
 		self.window = window
 		self.decks_to_export = self.window.decks
 
+	#Converts a deck from SQL database into list of notes. 
 	def make_list_from_one_deck(self, deckName):
 		col = mw.col
 		decks = col.decks
@@ -71,16 +73,20 @@ class Exporter(object):
 		    notes.append([note.fields[0],note.fields[1]])
 		return notes
 
+	#Initiates 'save into' window.
 	def get_file_name(self):
 		name = QFileDialog.getSaveFileName()
 		return name
 
+	#Appends lists of notes from all checked decks into one list.
 	def make_list_from_decks(self, array):
 		decks = []
 		for deck in array:
 			decks += self.make_list_from_one_deck(deck)
 		return decks
 
+	#Divides long sentences into 35 characters long lines and 
+	#matches part of given sentence with its translation.
 	def wrap_into_half_lines(self, decks):
 		rows = decks
 		rows = [[textwrap.wrap(thing, width=35) for thing in row] for row in rows]
@@ -88,6 +94,7 @@ class Exporter(object):
 		rows = [[list(line) for line in row ] for row in rows]
 		return rows
 
+	#Formats list into 2 columns.
 	def adjust_half_lines(self, rows):
 		for index, row in enumerate(rows):
 			length = len(rows[index])
@@ -100,6 +107,7 @@ class Exporter(object):
 				k+=1
 		return rows
 
+	#Converts list into nicely formatted string.
 	def make_formatted_string(self, rows):
 		to_save = ''
 		for row in rows:
@@ -116,7 +124,6 @@ class Exporter(object):
 				readFile.write(string_to_save)
 
 	def convert_2_cram_list(self):
-
 		decks = self.make_list_from_decks(self.decks_to_export)
 		rows = self.wrap_into_half_lines(decks)
 		name = self.get_file_name()
