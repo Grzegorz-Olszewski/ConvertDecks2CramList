@@ -1,17 +1,13 @@
-# import the main window object (mw) from aqt
-from aqt import mw
-# import the "show info" tool from utils.py
-from aqt.utils import showText
-# import all of the Qt GUI library
-from aqt.qt import *
-from anki.exporting import *
 import io
 import textwrap
 import itertools
+from aqt import mw
+from aqt.qt import *
+from anki.exporting import *
 from PyQt4 import QtCore
 
-class Window(QDialog):
 
+class Window(QDialog):
     def __init__(self, mw):
         super(Window, self).__init__()
         self.mw = mw
@@ -21,13 +17,13 @@ class Window(QDialog):
         self.home()
         self.show()
 
-    #Builds UI for plugin.
     def home(self):
+    	'''Builds UI for plugin.'''
         label = QLabel(self)
         text = "Choose decks you want to export to file."
         longest_line = len(text)
         label.setText(text)
-        label.move(0,5)
+        label.move(0, 5)
         for index, deck in enumerate(self.all_decks):
             self.check_box = MyCheckBox(deck, self)
             self.check_box.stateChanged.connect(self.check_box.add_or_remove_deck_from_export)
@@ -55,13 +51,14 @@ class MyCheckBox(QCheckBox):
         elif self.text in self.window.decks:
             self.window.decks.remove(self.text)
 
+
 class Exporter(object):
     def __init__(self, window):
         self.window = window
         self.decks_to_export = self.window.decks
 
-    #Converts a deck from SQL database into list of notes. 
     def make_list_from_one_deck(self, deckName):
+    	'''Converts a deck from SQL database into list of notes. '''
         col = mw.col
         decks = col.decks
         rosId = decks.id(deckName)
@@ -73,29 +70,29 @@ class Exporter(object):
             notes.append([note.fields[0],note.fields[1]])
         return notes
 
-    #Initiates 'save into' window.
     def get_file_name(self):
+    	'''Initiates 'save into' window.'''
         name = QFileDialog.getSaveFileName()
         return name
 
-    #Appends lists of notes from all checked decks into one list.
     def make_list_from_decks(self, array):
+    	'''Appends lists of notes from all checked decks into one list.'''
         decks = []
         for deck in array:
             decks += self.make_list_from_one_deck(deck)
         return decks
 
-    #Divides long sentences into 35 characters long lines and 
-    #matches part of given sentence with its translation.
     def wrap_into_half_lines(self, decks):
+    	'''Divides long sentences into 35 characters long lines and 
+        matches part of given sentence with its translation.'''
         rows = decks
         rows = [[textwrap.wrap(thing, width=35) for thing in row] for row in rows]
         rows = [list(itertools.izip_longest(row[0], row[1], fillvalue = "")) for row in rows]
         rows = [[list(line) for line in row ] for row in rows]
         return rows
 
-    #Formats list into 2 columns.
     def adjust_half_lines(self, rows):
+    	'''Formats list into 2 columns.'''
         for index, row in enumerate(rows):
             length = len(rows[index])
             k = 0
@@ -107,8 +104,8 @@ class Exporter(object):
                 k+=1
         return rows
 
-    #Converts list into nicely formatted string.
     def make_formatted_string(self, rows):
+    	'''Converts list into nicely formatted string.'''
         to_save = ''
         for row in rows:
             for line in row: 
