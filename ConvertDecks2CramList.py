@@ -111,12 +111,8 @@ class Exporter(object):
         return to_save
 
     def save_string_to_file(self, file_name, string_to_save):
-        if not string_to_save:
-            with io.open(file_name, "wb") as readFile:
-                readFile.write(string_to_save)
-        else:
-            with io.open(file_name, "w") as readFile:
-                readFile.write(string_to_save)
+        with open(file_name, "wb") as f:
+            f.write(string_to_save.encode('utf-8'))
 
     def convert_2_cram_list(self):
         decks = self.make_list_from_decks(self.decks_to_export)
